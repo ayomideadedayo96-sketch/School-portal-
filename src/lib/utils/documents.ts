@@ -6,9 +6,7 @@ export const DOCUMENT_BUCKET = 'school-documents'
 // Kept in sync with the Storage bucket's own file_size_limit
 // (supabase/migrations/0005_phase4b_documents_announcements.sql) so the
 // UI/action can reject an oversized file before attempting the upload.
-export const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024 // 10 MB
-
-export const DOCUMENT_ACCEPT = '.pdf,.doc,.docx,.jpg,.jpeg,.png'
+export { DOCUMENT_ACCEPT, MAX_DOCUMENT_SIZE } from './documentConstants'
 
 const DOCUMENT_TYPES: Record<string, DocumentFileType> = {
   pdf: 'pdf',
