@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-paper text-ink font-sans;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-gold-400;
+  }
+}
+
+/* Print: strip the app chrome (header/sidebar) so only page content —
+   e.g. a student result report — prints, regardless of which layout
+   the page happens to be nested under. */
+@media print {
+  header,
+  nav {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
