@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/toast/ToastProvider'
 import Spinner from '@/components/Spinner'
-import { DOCUMENT_ACCEPT, MAX_DOCUMENT_SIZE } from '@/lib/utils/documents'
+import { DOCUMENT_ACCEPT, MAX_DOCUMENT_SIZE } from '@/lib/utils/documentConstants'
 import { AUDIENCE_LABELS, type Audience } from '@/types/database.types'
 import { createDocument } from './actions'
 
