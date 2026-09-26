@@ -4,6 +4,7 @@ import PageHeader from '@/components/admin/PageHeader'
 import SelectFilter from '@/components/admin/SelectFilter'
 import EmptyState from '@/components/admin/EmptyState'
 import TimetableGrid from '@/components/timetable/TimetableGrid'
+import { toFriendlyError } from '@/lib/utils/errors'
 import { ALL_DAYS, PERIODS } from '@/lib/utils/schedule'
 import type { TimetableEntryWithDetails } from '@/types/database.types'
 
@@ -35,6 +36,8 @@ export default async function TeacherTimetablePage({
         .order('period')
     : { data: [], error: null }
 
+  if (error) console.error(error)
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="My Timetable" description={`Weekly schedule for ${profile?.full_name ?? 'you'}.`} />
@@ -49,7 +52,7 @@ export default async function TeacherTimetablePage({
 
       {error ? (
         <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Could not load your timetable: {error.message}
+          Could not load your timetable: {toFriendlyError(error)}
         </p>
       ) : !entries || entries.length === 0 ? (
         <EmptyState

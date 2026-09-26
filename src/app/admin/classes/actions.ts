@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/auth/requireAdmin'
@@ -88,7 +90,14 @@ export async function setClassStatus(classId: string, status: 'active' | 'archiv
     .select('name')
     .single()
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   await logActivity({
     action: status === 'archived' ? 'archive' : 'restore',
@@ -129,7 +138,14 @@ export async function removeClassSubject(classSubjectId: string, classId: string
   const supabase = await createClient()
   const { error } = await supabase.from('class_subjects').delete().eq('id', classSubjectId)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   revalidatePath(`/admin/classes/${classId}`)
   return { success: true }

@@ -149,6 +149,7 @@ export default async function SettingsPage() {
         {!boundaries || boundaries.length === 0 ? (
           <p className="px-5 py-6 text-sm text-navy-400">No grade boundaries configured yet.</p>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-navy-100 text-xs uppercase tracking-wide text-navy-400">
               <tr>
@@ -192,6 +193,7 @@ export default async function SettingsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/auth/requireAdmin'
@@ -160,7 +162,14 @@ export async function setStudentStatus(studentId: string, status: 'active' | 'ar
     .select('full_name, admission_number')
     .single()
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   await logActivity({
     action: status === 'archived' ? 'archive' : 'restore',

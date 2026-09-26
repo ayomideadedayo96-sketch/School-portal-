@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import type { DocumentFileType } from '@/types/database.types'
+import { DOCUMENT_ACCEPT, MAX_DOCUMENT_SIZE } from './documentConstants'
 
 export const DOCUMENT_BUCKET = 'school-documents'
 
-// Kept in sync with the Storage bucket's own file_size_limit
-// (supabase/migrations/0005_phase4b_documents_announcements.sql) so the
-// UI/action can reject an oversized file before attempting the upload.
-export { DOCUMENT_ACCEPT, MAX_DOCUMENT_SIZE } from './documentConstants'
+// Re-exported for existing server-side importers (actions.ts, page.tsx
+// files) so they don't need to change their import path. The one
+// importer that must NOT go through this file is DocumentDialog.tsx (a
+// Client Component) — it imports these directly from ./documentConstants
+// instead, since this file also pulls in the server-only Supabase client.
+export { DOCUMENT_ACCEPT, MAX_DOCUMENT_SIZE }
 
 const DOCUMENT_TYPES: Record<string, DocumentFileType> = {
   pdf: 'pdf',

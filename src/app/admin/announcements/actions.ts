@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/auth/requireAdmin'
@@ -70,7 +72,10 @@ export async function createAnnouncement(formData: FormData): Promise<ActionResu
 
   const supabase = await createClient()
   const { error } = await supabase.from('announcements').insert(fields)
-  if (error) return { success: false, error: error.message }
+    if (error) {
+    console.error(error)
+    return { success: false, error: toFriendlyError(error) }
+  }
 
   await logActivity({ action: 'create', entityType: 'announcement', description: `Posted announcement "${fields.title}"` })
 
@@ -88,7 +93,10 @@ export async function updateAnnouncement(id: string, formData: FormData): Promis
 
   const supabase = await createClient()
   const { error } = await supabase.from('announcements').update(fields).eq('id', id)
-  if (error) return { success: false, error: error.message }
+    if (error) {
+    console.error(error)
+    return { success: false, error: toFriendlyError(error) }
+  }
 
   await logActivity({ action: 'update', entityType: 'announcement', description: `Updated announcement "${fields.title}"` })
 
@@ -108,7 +116,14 @@ export async function setAnnouncementArchived(id: string, archived: boolean): Pr
     .select('title')
     .single()
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   await logActivity({
     action: archived ? 'archive' : 'restore',
@@ -126,7 +141,10 @@ export async function deleteAnnouncement(id: string): Promise<ActionResult> {
 
   const supabase = await createClient()
   const { error } = await supabase.from('announcements').delete().eq('id', id)
-  if (error) return { success: false, error: error.message }
+    if (error) {
+    console.error(error)
+    return { success: false, error: toFriendlyError(error) }
+  }
 
   await logActivity({ action: 'delete', entityType: 'announcement', description: 'Deleted an announcement' })
 

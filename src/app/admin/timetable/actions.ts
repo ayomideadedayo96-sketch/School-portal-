@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/auth/requireAdmin'
@@ -91,7 +93,7 @@ export async function createTimetableEntry(formData: FormData): Promise<ActionRe
 
   if (error) {
     const message =
-      error.code === '23505' ? 'This class already has a lesson scheduled in that period.' : error.message
+      error.code === '23505' ? 'This class already has a lesson scheduled in that period.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -133,7 +135,7 @@ export async function updateTimetableEntry(entryId: string, formData: FormData):
 
   if (error) {
     const message =
-      error.code === '23505' ? 'This class already has a lesson scheduled in that period.' : error.message
+      error.code === '23505' ? 'This class already has a lesson scheduled in that period.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -150,7 +152,14 @@ export async function deleteTimetableEntry(entryId: string): Promise<ActionResul
   const supabase = await createClient()
   const { error } = await supabase.from('timetable_entries').delete().eq('id', entryId)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   revalidatePath('/admin/timetable')
   revalidatePath('/teacher/timetable')

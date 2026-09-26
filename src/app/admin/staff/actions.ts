@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
@@ -85,7 +87,9 @@ export async function createStaffAccount(formData: FormData): Promise<ActionResu
     .single()
 
   if (staffError) {
-    return { success: false, error: staffError.message }
+
+    console.error(staffError)
+    return { success: false, error: toFriendlyError(staffError) }
   }
 
   await logActivity({
@@ -126,7 +130,9 @@ export async function updateStaff(staffId: string, formData: FormData): Promise<
     .eq('id', staffRow.profile_id)
 
   if (profileError) {
-    return { success: false, error: profileError.message }
+
+    console.error(profileError)
+    return { success: false, error: toFriendlyError(profileError) }
   }
 
   const { error: staffError } = await supabase
@@ -139,7 +145,9 @@ export async function updateStaff(staffId: string, formData: FormData): Promise<
     .eq('id', staffId)
 
   if (staffError) {
-    return { success: false, error: staffError.message }
+
+    console.error(staffError)
+    return { success: false, error: toFriendlyError(staffError) }
   }
 
   await logActivity({
@@ -167,7 +175,14 @@ export async function setStaffStatus(staffId: string, status: 'active' | 'inacti
     .select('profile_id, profiles(full_name)')
     .single()
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   await logActivity({
     action: status === 'inactive' ? 'deactivate' : 'activate',
@@ -220,7 +235,14 @@ export async function revokeStaffPermission(profileId: string, permission: Staff
     .eq('profile_id', profileId)
     .eq('permission', permission)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   await logActivity({
     action: 'revoke',

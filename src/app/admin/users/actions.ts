@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/auth/requireAdmin'
@@ -52,7 +54,10 @@ export async function changeUserRole(profileId: string, newRole: UserRole): Prom
   const previousRole = target.role
 
   const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', profileId)
-  if (error) return { success: false, error: error.message }
+    if (error) {
+    console.error(error)
+    return { success: false, error: toFriendlyError(error) }
+  }
 
   // Keep staff.staff_type consistent with the new role for scheduling
   // purposes (teaching vs non-teaching), same convention updateStaff uses.

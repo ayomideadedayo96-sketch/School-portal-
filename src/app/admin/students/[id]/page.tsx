@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getStudentPhotoUrl } from '@/lib/utils/photo'
@@ -68,8 +69,13 @@ export default async function StudentProfilePage({ params }: { params: { id: str
         <div className="flex flex-col items-center gap-3 rounded-lg border border-navy-100 bg-white p-6 shadow-sm">
           <div className="h-28 w-28 overflow-hidden rounded-full border border-navy-100 bg-navy-50">
             {photoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={photoUrl} alt={student.full_name} className="h-full w-full object-cover" />
+              <Image
+                src={photoUrl}
+                alt={student.full_name}
+                width={112}
+                height={112}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center font-display text-2xl text-navy-300">
                 {initials(student.full_name)}

@@ -44,6 +44,7 @@ export default async function SubjectsPage({ searchParams }: { searchParams: { q
         ) : !subjects || subjects.length === 0 ? (
           <EmptyState title="No subjects yet" description="Add your first subject to get started." />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-navy-100 text-xs uppercase tracking-wide text-navy-400">
               <tr>
@@ -83,6 +84,7 @@ export default async function SubjectsPage({ searchParams }: { searchParams: { q
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

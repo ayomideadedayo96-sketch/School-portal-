@@ -3,6 +3,7 @@ import PageHeader from '@/components/admin/PageHeader'
 import SelectFilter from '@/components/admin/SelectFilter'
 import TimetableFilterBar from './TimetableFilterBar'
 import TimetableManager from './TimetableManager'
+import { toFriendlyError } from '@/lib/utils/errors'
 import type { TimetableEntryWithDetails } from '@/types/database.types'
 
 export default async function AdminTimetablePage({
@@ -22,18 +23,30 @@ export default async function AdminTimetablePage({
   const currentSession = sessions?.find((s) => s.is_current)
   const sessionId = searchParams.session || currentSession?.id || ''
 
-  let query = supabase
-    .from('timetable_entries')
-    .select(
-      'id, class_id, academic_session_id, day_of_week, period, subject_id, teacher_id, room, created_at, updated_at, class:classes(id, name), subject:subjects(id, name), teacher:profiles(id, full_name)'
-    )
-    .eq('academic_session_id', sessionId)
+  let entries: TimetableEntryWithDetails[] = []
+  let error: { message: string } | null = null
 
-  if (searchParams.class) query = query.eq('class_id', searchParams.class)
-  if (searchParams.teacher) query = query.eq('teacher_id', searchParams.teacher)
-  if (searchParams.day) query = query.eq('day_of_week', searchParams.day)
+  // Only query once we actually have a session id — passing '' as a
+  // uuid filter fails at the database with a syntax error rather than
+  // just returning no rows, so this has to be skipped entirely rather
+  // than filtered on.
+  if (sessionId) {
+    let query = supabase
+      .from('timetable_entries')
+      .select(
+        'id, class_id, academic_session_id, day_of_week, period, subject_id, teacher_id, room, created_at, updated_at, class:classes(id, name), subject:subjects(id, name), teacher:profiles(id, full_name)'
+      )
+      .eq('academic_session_id', sessionId)
 
-  const { data: entries, error } = await query.order('period')
+    if (searchParams.class) query = query.eq('class_id', searchParams.class)
+    if (searchParams.teacher) query = query.eq('teacher_id', searchParams.teacher)
+    if (searchParams.day) query = query.eq('day_of_week', searchParams.day)
+
+    const result = await query.order('period')
+    entries = (result.data ?? []) as unknown as TimetableEntryWithDetails[]
+    error = result.error
+    if (error) console.error(error)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,7 +65,7 @@ export default async function AdminTimetablePage({
 
       {error ? (
         <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Could not load the timetable: {error.message}
+          Could not load the timetable: {toFriendlyError(error)}
         </p>
       ) : !sessionId ? (
         <p className="rounded-lg border border-navy-100 bg-white px-4 py-6 text-center text-sm text-navy-400 shadow-sm">

@@ -1,4 +1,4 @@
-import { createServerClient,type CookieOptions } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const ROLE_HOME: Record<string, string> = {

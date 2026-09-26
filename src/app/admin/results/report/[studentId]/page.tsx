@@ -34,13 +34,16 @@ export default async function StudentResultReportPage({
   const session = sessions?.find((s) => s.id === sessionId)
   const term = terms?.find((t) => t.id === termId)
 
-  const { data: results } = await supabase
-    .from('results')
-    .select('ca_score, exam_score, total, grade, remark, subject:subjects(name)')
-    .eq('student_id', student.id)
-    .eq('academic_session_id', sessionId)
-    .eq('term_id', termId)
-    .order('subject_id')
+  const { data: results } =
+    sessionId && termId
+      ? await supabase
+          .from('results')
+          .select('ca_score, exam_score, total, grade, remark, subject:subjects(name)')
+          .eq('student_id', student.id)
+          .eq('academic_session_id', sessionId)
+          .eq('term_id', termId)
+          .order('subject_id')
+      : { data: [] }
 
   const rows = (results ?? []) as any[]
   const totalScore = rows.reduce((sum, r) => sum + (r.total ?? 0), 0)
@@ -76,7 +79,7 @@ export default async function StudentResultReportPage({
           <Detail label="Term" value={term?.name} />
         </dl>
 
-        <div className="mt-8 overflow-hidden rounded-lg border border-navy-100">
+        <div className="mt-8 overflow-x-auto rounded-lg border border-navy-100">
           <table className="w-full text-left text-sm">
             <thead className="bg-navy-50 text-xs uppercase tracking-wide text-navy-500">
               <tr>

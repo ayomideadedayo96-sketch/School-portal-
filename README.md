@@ -1,4 +1,4 @@
-# School Portal — Phase 1 + Phase 2 + Phase 3 + Phase 4
+# School Portal — Phases 1–7
 
 **Phase 1** — authentication, roles (admin/teacher/staff), and the core
 database structure.
@@ -12,6 +12,16 @@ today's timetable, today's attendance status, recent announcements and
 documents), a school-wide weekly timetable (admin-managed, teacher
 read-only), a teacher-facing student roster, and admin-managed
 announcements and documents.
+**Phase 4b** — file-based document uploads and richer announcements
+(class/staff audiences, scheduling, expiry, archiving) on top of Phase 4's
+link-based versions.
+**Phase 6** — administrative controls: a Users & Access page (roles, last
+login, activate/deactivate), an admin-only Activity Log viewer, and a
+School Profile section (name, logo, contact details) in Settings.
+**Phase 7** — production-readiness pass: sanitized error messages,
+a global error boundary and 404 page, mobile table-scroll fixes,
+pagination on the last unbounded list, image optimization, and the
+security/deployment documentation in `docs/`.
 
 ## 1. Stack
 
@@ -26,6 +36,8 @@ Auth + Storage), deployable to Netlify via `@netlify/plugin-nextjs`.
    2. `supabase/migrations/0002_phase2.sql`
    3. `supabase/migrations/0003_phase3.sql`
    4. `supabase/migrations/0004_phase4.sql`
+   5. `supabase/migrations/0005_phase4b_documents_announcements.sql`
+   6. `supabase/migrations/0006_phase6_admin_controls.sql`
 3. In **Authentication > Providers**, confirm Email is enabled.
 4. In **Authentication > URL Configuration**, set:
    - Site URL: your deployed URL (or `http://localhost:3000` for local dev)
@@ -44,8 +56,18 @@ Auth + Storage), deployable to Netlify via `@netlify/plugin-nextjs`.
      ```
    - A database trigger reads that metadata and creates the matching
      `profiles` row automatically. If you invited before setting the
-     metadata, just re-run the metadata edit and re-run this once in SQL
-     Editor: `update public.profiles set role = 'admin' where email = 'you@school.edu';`
+     metadata (or need to fix the role after the fact), the role-change
+     trigger blocks direct SQL edits from an unauthenticated SQL Editor
+     session, so wrap the update like this:
+     ```sql
+     alter table public.profiles disable trigger trg_prevent_role_self_escalation;
+     update public.profiles set role = 'admin' where email = 'you@school.edu';
+     alter table public.profiles enable trigger trg_prevent_role_self_escalation;
+     ```
+     (The trigger is only off for the instant this runs — it's the
+     standard way to bootstrap the very first admin, since by definition
+     no admin exists yet to make the change through the normal, protected
+     path.)
    - Also give yourself a `staff` row so the dashboard's staff list and
      counts include you (optional but tidy):
      ```sql

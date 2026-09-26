@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { randomUUID } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
@@ -71,7 +73,14 @@ export async function saveSchoolProfile(formData: FormData): Promise<ActionResul
     })
     .eq('id', 1)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   await logActivity({
     action: 'update',
@@ -117,7 +126,14 @@ export async function setCurrentSession(sessionId: string): Promise<ActionResult
   await supabase.from('academic_sessions').update({ is_current: false }).eq('is_current', true)
   const { error } = await supabase.from('academic_sessions').update({ is_current: true }).eq('id', sessionId)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   revalidatePath('/admin/settings')
   revalidatePath('/admin')
@@ -158,7 +174,14 @@ export async function setCurrentTerm(termId: string): Promise<ActionResult> {
   await supabase.from('terms').update({ is_current: false }).eq('is_current', true)
   const { error } = await supabase.from('terms').update({ is_current: true }).eq('id', termId)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   revalidatePath('/admin/settings')
   revalidatePath('/admin')
@@ -179,7 +202,14 @@ export async function updateScoreSettings(formData: FormData): Promise<ActionRes
   const supabase = await createClient()
   const { error } = await supabase.from('score_settings').update({ ca_max, exam_max }).eq('id', 1)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   revalidatePath('/admin/settings')
   return { success: true }
@@ -251,7 +281,14 @@ export async function deleteGradeBoundary(id: string): Promise<ActionResult> {
   const supabase = await createClient()
   const { error } = await supabase.from('grade_boundaries').delete().eq('id', id)
 
-  if (error) return { success: false, error: error.message }
+  
+  if (error) {
+
+    console.error(error)
+
+    return { success: false, error: toFriendlyError(error) }
+
+  }
 
   revalidatePath('/admin/settings')
   return { success: true }

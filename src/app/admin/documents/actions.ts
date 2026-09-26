@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { randomUUID } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
@@ -76,7 +78,7 @@ export async function createDocument(formData: FormData): Promise<ActionResult> 
   if (insertError) {
     // Roll back the upload so we don't leak an orphaned file.
     await supabase.storage.from(DOCUMENT_BUCKET).remove([path])
-    return { success: false, error: insertError.message }
+    return { success: false, error: toFriendlyError(insertError) }
   }
 
   await logActivity({ action: 'create', entityType: 'document', description: `Uploaded document "${title}"` })
@@ -93,7 +95,10 @@ export async function deleteDocument(id: string): Promise<ActionResult> {
   const { data: doc } = await supabase.from('documents').select('file_path, title').eq('id', id).single()
 
   const { error } = await supabase.from('documents').delete().eq('id', id)
-  if (error) return { success: false, error: error.message }
+    if (error) {
+    console.error(error)
+    return { success: false, error: toFriendlyError(error) }
+  }
 
   if (doc?.file_path) {
     await supabase.storage.from(DOCUMENT_BUCKET).remove([doc.file_path])

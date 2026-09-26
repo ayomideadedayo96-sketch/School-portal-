@@ -3,10 +3,13 @@ import PageHeader from '@/components/admin/PageHeader'
 import EmptyState from '@/components/admin/EmptyState'
 import ErrorState from '@/components/admin/ErrorState'
 import ConfirmActionButton from '@/components/admin/ConfirmActionButton'
+import Pagination from '@/components/admin/Pagination'
 import { formatDateTime } from '@/lib/utils/format'
 import { AUDIENCE_LABELS, type Audience, type AnnouncementWithAuthor } from '@/types/database.types'
 import AnnouncementDialog from './AnnouncementDialog'
 import { deleteAnnouncement, setAnnouncementArchived } from './actions'
+
+const PAGE_SIZE = 20
 
 type AnnouncementStatus = 'scheduled' | 'active' | 'expired' | 'archived'
 
@@ -32,16 +35,25 @@ const STATUS_LABEL: Record<AnnouncementStatus, string> = {
   archived: 'Archived',
 }
 
-export default async function AdminAnnouncementsPage() {
+export default async function AdminAnnouncementsPage({
+  searchParams,
+}: {
+  searchParams: { page?: string }
+}) {
   const supabase = await createClient()
+  const page = Math.max(1, Number(searchParams.page) || 1)
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
-  const [{ data: announcements, error }, { data: classes }] = await Promise.all([
+  const [{ data: announcements, count, error }, { data: classes }] = await Promise.all([
     supabase
       .from('announcements')
       .select(
-        'id, title, body, audience, class_id, publish_at, expires_at, is_archived, created_at, updated_at, created_by, class:classes(id, name), author:profiles(full_name)'
+        'id, title, body, audience, class_id, publish_at, expires_at, is_archived, created_at, updated_at, created_by, class:classes(id, name), author:profiles(full_name)',
+        { count: 'exact' }
       )
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
+      .range(from, to),
     supabase.from('classes').select('id, name').eq('status', 'active').order('name'),
   ])
 
@@ -126,6 +138,9 @@ export default async function AdminAnnouncementsPage() {
               )
             })}
           </ul>
+        )}
+        {!error && rows.length > 0 && (
+          <Pagination page={page} pageSize={PAGE_SIZE} total={count ?? 0} basePath="/admin/announcements" searchParams={searchParams} />
         )}
       </div>
     </div>
