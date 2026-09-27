@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function AuthCallbackPage() {
+function AuthCallbackInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState(false)
@@ -60,7 +60,7 @@ export default function AuthCallbackPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-paper px-6 text-center">
       {error ? (
         <>
-          <h1 className="font-display text-xl font-semibold text-navy-800">That link didn&apos;t work</h1>
+          <h1 className="font-display text-xl font-semibold text-navy-800">That link didn't work</h1>
           <p className="max-w-sm text-sm text-navy-500">
             It may have expired or already been used. Redirecting you back to login&hellip;
           </p>
@@ -70,4 +70,12 @@ export default function AuthCallbackPage() {
       )}
     </div>
   )
-      }
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<p className="text-sm text-navy-500">Loading&hellip;</p>}>
+      <AuthCallbackInner />
+    </Suspense>
+  )
+}
