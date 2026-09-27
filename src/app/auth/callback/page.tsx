@@ -60,7 +60,7 @@ function AuthCallbackInner() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-paper px-6 text-center">
       {error ? (
         <>
-          <h1 className="font-display text-xl font-semibold text-navy-800">That link didn't work</h1>
+          <h1 className="font-display text-xl font-semibold text-navy-800">That link didn&apos;t work</h1>
           <p className="max-w-sm text-sm text-navy-500">
             It may have expired or already been used. Redirecting you back to login&hellip;
           </p>
