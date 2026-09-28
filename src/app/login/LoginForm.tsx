@@ -30,7 +30,14 @@ export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const linkError = searchParams.get('error')
+  const [error, setError] = useState<string | null>(
+    linkError === 'link_expired'
+      ? 'That link has expired or was already used. Ask your administrator to send a new invite, or use "Forgot password?" below to set a password.'
+      : linkError === 'auth_callback_failed'
+        ? 'We could not sign you in from that link. Ask your administrator to send a new invite, or use "Forgot password?" below.'
+        : null
+  )
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()

@@ -68,3 +68,26 @@ A template with placeholder (non-secret) values is kept in
 | Login always fails with a generic error, password is definitely correct | The URL and keys in Netlify's env vars belong to **different Supabase projects** (easy mistake if you have more than one project open) | Copy all three values fresh, from the same Settings → API screen, in one sitting |
 | Password reset link opens `localhost:3000` in production | Supabase's **Site URL** under Authentication → URL Configuration still points at localhost | Update it to your live Netlify URL, then request a new reset link (old links keep the stale domain) |
 | SQL Editor role update fails: "Only administrators can change a user role" | The `prevent_role_self_escalation` trigger has no authenticated session to check when run from SQL Editor directly | Wrap the one-time bootstrap update in `alter table ... disable trigger` / `update` / `alter table ... enable trigger` (see README.md) |
+
+## 6. Before you invite real staff — two settings that matter
+
+**Email limits.** Supabase's built-in email sender is only meant for
+testing: it allows just a few emails per hour across the whole project
+(invites, password resets and sign-in emails all count). Once that limit
+is hit, invites fail with "email rate limit exceeded". For real use, add
+your own email provider: Supabase → Authentication → SMTP Settings →
+enable custom SMTP (Resend, Brevo, Gmail SMTP, etc.).
+
+**Server region.** Every page load makes several database calls. If
+Netlify's functions run on a different continent from your Supabase
+project, each call adds delay and pages feel slow (and can occasionally
+time out). Check your Supabase project's region (Settings → General),
+then in Netlify go to Site configuration → Functions → Region and pick
+the closest match.
+
+**Invite / reset links.** Supabase → Authentication → URL Configuration
+must list your live address under Redirect URLs, e.g.
+`https://your-site.netlify.app/**`. Email link scanners (some
+corporate/school mail systems) can "open" a link before the person does,
+which uses it up — if someone reports an expired link, send a fresh
+invite or have them use "Forgot password?".

@@ -1,5 +1,7 @@
 'use server'
 
+import { toFriendlyError } from '@/lib/utils/errors'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/auth/requireAdmin'
@@ -25,7 +27,7 @@ export async function createSubject(name: string, code: string): Promise<ActionR
     .single()
 
   if (error) {
-    const message = error.code === '23505' ? 'A subject with that code already exists.' : error.message
+    const message = error.code === '23505' ? 'A subject with that code already exists.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -54,7 +56,7 @@ export async function updateSubject(subjectId: string, name: string, code: strin
     .eq('id', subjectId)
 
   if (error) {
-    const message = error.code === '23505' ? 'A subject with that code already exists.' : error.message
+    const message = error.code === '23505' ? 'A subject with that code already exists.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -79,7 +81,7 @@ export async function deleteSubject(subjectId: string): Promise<ActionResult> {
   if (error) {
     const message = error.code === '23503'
       ? 'This subject is still assigned to a class or teacher — remove those assignments first.'
-      : error.message
+      : toFriendlyError(error)
     return { success: false, error: message }
   }
 

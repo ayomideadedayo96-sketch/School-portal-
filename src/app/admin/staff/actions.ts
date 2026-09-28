@@ -48,61 +48,101 @@ export async function createStaffAccount(formData: FormData): Promise<ActionResu
     }
   }
 
-  const origin = await getOrigin()
+  // Tracks how far we got, so that if anything throws unexpectedly we can
+  // tell the admin honestly whether the invite email already went out —
+  // instead of letting the exception escape and blank the whole page
+  // while the invitee's email is already on its way.
+  let step = 'starting'
+  let inviteSent = false
 
-  const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-    data: { full_name: fullName, role },
-    redirectTo: `${origin}/auth/callback?next=/update-password`,
-  })
+  try {
+    step = 'reading the site address'
+    const origin = await getOrigin()
 
-  if (inviteError || !invited.user) {
-    const message = inviteError?.message.toLowerCase().includes('already been registered')
-      ? 'A user with that email already exists.'
-      : inviteError?.message ?? 'Failed to invite the new user.'
-    return { success: false, error: message }
-  }
-
-  const supabase = await createClient()
-
-  if (phone) {
-    await supabase.from('profiles').update({ phone }).eq('user_id', invited.user.id)
-  }
-
-  const { data: profile } = await supabase.from('profiles').select('id').eq('user_id', invited.user.id).single()
-
-  if (!profile) {
-    return { success: false, error: 'Account was created, but the profile record was not found. Please retry.' }
-  }
-
-  const { data: staffRow, error: staffError } = await supabase
-    .from('staff')
-    .insert({
-      profile_id: profile.id,
-      staff_type: role === 'teacher' ? 'teaching' : 'non_teaching',
-      department,
-      position,
-      status: 'active',
+    step = 'sending the invite email'
+    const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: { full_name: fullName, role },
+      redirectTo: `${origin}/auth/callback?next=/update-password`,
     })
-    .select('id')
-    .single()
 
-  if (staffError) {
+    if (inviteError || !invited?.user) {
+      if (inviteError) console.error('invite failed:', inviteError)
+      const raw = (inviteError?.message ?? '').toLowerCase()
+      if (raw.includes('already been registered')) {
+        return { success: false, error: 'A user with that email already exists.' }
+      }
+      if (raw.includes('rate limit')) {
+        return {
+          success: false,
+          error:
+            'The email service is limiting how many invites can be sent per hour. Please wait a while and try again.',
+        }
+      }
+      return { success: false, error: 'Failed to send the invite. Please check the email address and try again.' }
+    }
+    inviteSent = true
 
-    console.error(staffError)
-    return { success: false, error: toFriendlyError(staffError) }
+    const supabase = await createClient()
+
+    if (phone) {
+      step = 'saving the phone number'
+      await supabase.from('profiles').update({ phone }).eq('user_id', invited.user.id)
+    }
+
+    step = 'finding the new profile'
+    const { data: profile } = await supabase.from('profiles').select('id').eq('user_id', invited.user.id).single()
+
+    if (!profile) {
+      return {
+        success: false,
+        error:
+          'The invite email was sent, but the profile record was not found. Open Users to check whether the account appears.',
+      }
+    }
+
+    step = 'saving the staff record'
+    const { data: staffRow, error: staffError } = await supabase
+      .from('staff')
+      .insert({
+        profile_id: profile.id,
+        staff_type: role === 'teacher' ? 'teaching' : 'non_teaching',
+        department,
+        position,
+        status: 'active',
+      })
+      .select('id')
+      .single()
+
+    if (staffError || !staffRow) {
+      console.error('staff insert failed:', staffError)
+      return {
+        success: false,
+        error: 'The invite email was sent, but saving the staff record failed. Open Users to check the account.',
+      }
+    }
+
+    step = 'recording the activity'
+    await logActivity({
+      action: 'create',
+      entityType: 'staff',
+      entityId: staffRow.id,
+      description: `Invited ${fullName} as ${role}`,
+    })
+
+    revalidatePath('/admin/staff')
+    revalidatePath('/admin/users')
+    revalidatePath('/admin')
+
+    return { success: true, staffId: staffRow.id }
+  } catch (err) {
+    console.error(`createStaffAccount failed while ${step}:`, err)
+    return {
+      success: false,
+      error: inviteSent
+        ? `The invite email was sent, but something went wrong afterwards (${step}). Open Users to check whether the account appears before inviting again.`
+        : `Something went wrong while ${step}. Please try again.`,
+    }
   }
-
-  await logActivity({
-    action: 'create',
-    entityType: 'staff',
-    entityId: staffRow.id,
-    description: `Invited ${fullName} as ${role}`,
-  })
-
-  revalidatePath('/admin/staff')
-  revalidatePath('/admin')
-
-  return { success: true, staffId: staffRow.id }
 }
 
 export async function updateStaff(staffId: string, formData: FormData): Promise<ActionResult> {
@@ -210,7 +250,7 @@ export async function grantStaffPermission(profileId: string, permission: StaffP
     .insert({ profile_id: profileId, permission, granted_by: auth.profile.id })
 
   if (error) {
-    const message = error.code === '23505' ? 'That permission has already been granted.' : error.message
+    const message = error.code === '23505' ? 'That permission has already been granted.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 

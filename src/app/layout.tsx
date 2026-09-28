@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import AuthHashRedirect from '@/components/AuthHashRedirect'
 
 export const metadata: Metadata = {
   title: 'School Portal',
@@ -17,7 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <AuthHashRedirect />
+        {children}
+      </body>
     </html>
   )
 }

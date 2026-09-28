@@ -25,6 +25,7 @@ export default function GlobalError({
             We hit an unexpected error loading this page. This has been logged — please try again, and contact your
             administrator if it keeps happening.
           </p>
+          {error.digest && <p className="font-mono text-xs text-navy-300">Reference: {error.digest}</p>}
           <button
             onClick={reset}
             className="rounded-md bg-navy-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-800"

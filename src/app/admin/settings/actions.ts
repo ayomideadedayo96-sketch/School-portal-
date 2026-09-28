@@ -109,7 +109,7 @@ export async function createAcademicSession(formData: FormData): Promise<ActionR
   const { error } = await supabase.from('academic_sessions').insert({ name, start_date, end_date })
 
   if (error) {
-    const message = error.code === '23505' ? 'A session with that name already exists.' : error.message
+    const message = error.code === '23505' ? 'A session with that name already exists.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -157,7 +157,7 @@ export async function createTerm(formData: FormData): Promise<ActionResult> {
   const { error } = await supabase.from('terms').insert({ academic_session_id, name, start_date, end_date })
 
   if (error) {
-    const message = error.code === '23505' ? 'A term with that name already exists for this session.' : error.message
+    const message = error.code === '23505' ? 'A term with that name already exists for this session.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -235,7 +235,7 @@ export async function createGradeBoundary(formData: FormData): Promise<ActionRes
   const { error } = await supabase.from('grade_boundaries').insert({ grade, min_score, max_score, remark })
 
   if (error) {
-    const message = error.code === '23505' ? 'That grade already exists.' : error.message
+    const message = error.code === '23505' ? 'That grade already exists.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -266,7 +266,7 @@ export async function updateGradeBoundary(id: string, formData: FormData): Promi
     .eq('id', id)
 
   if (error) {
-    const message = error.code === '23505' ? 'That grade already exists.' : error.message
+    const message = error.code === '23505' ? 'That grade already exists.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 

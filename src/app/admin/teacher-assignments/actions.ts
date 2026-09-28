@@ -31,7 +31,7 @@ export async function createTeacherAssignment(formData: FormData): Promise<Actio
     .insert({ teacher_id, subject_id, class_id, academic_session_id })
 
   if (error) {
-    const message = error.code === '23505' ? 'That teacher is already assigned to this subject and class.' : error.message
+    const message = error.code === '23505' ? 'That teacher is already assigned to this subject and class.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 

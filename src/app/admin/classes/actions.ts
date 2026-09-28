@@ -34,7 +34,7 @@ export async function createClass(formData: FormData): Promise<ActionResult> {
     .single()
 
   if (error) {
-    const message = error.code === '23505' ? 'A class with that name already exists for this session.' : error.message
+    const message = error.code === '23505' ? 'A class with that name already exists for this session.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -66,7 +66,7 @@ export async function updateClass(classId: string, formData: FormData): Promise<
     .eq('id', classId)
 
   if (error) {
-    const message = error.code === '23505' ? 'A class with that name already exists for this session.' : error.message
+    const message = error.code === '23505' ? 'A class with that name already exists for this session.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
@@ -123,7 +123,7 @@ export async function addClassSubject(classId: string, subjectId: string, academ
     .insert({ class_id: classId, subject_id: subjectId, academic_session_id: academicSessionId })
 
   if (error) {
-    const message = error.code === '23505' ? 'That subject is already assigned to this class.' : error.message
+    const message = error.code === '23505' ? 'That subject is already assigned to this class.' : toFriendlyError(error)
     return { success: false, error: message }
   }
 
