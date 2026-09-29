@@ -76,7 +76,7 @@ export default async function SubjectsPage({ searchParams }: { searchParams: { q
                         confirmLabel="Delete"
                         variant="danger"
                         successMessage="Subject deleted."
-                        action={() => deleteSubject(s.id)}
+                        action={deleteSubject.bind(null, s.id)}
                       />
                     </div>
                   </td>

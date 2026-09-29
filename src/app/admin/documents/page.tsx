@@ -119,7 +119,7 @@ export default async function AdminDocumentsPage({
                       confirmLabel="Delete"
                       variant="danger"
                       successMessage="Document deleted."
-                      action={() => deleteDocument(d.id)}
+                      action={deleteDocument.bind(null, d.id)}
                     />
                   </div>
                 </li>

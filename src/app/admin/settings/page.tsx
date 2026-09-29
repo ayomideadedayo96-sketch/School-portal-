@@ -84,7 +84,7 @@ export default async function SettingsPage() {
                     {formatDate(s.start_date)} – {formatDate(s.end_date)}
                   </p>
                 </div>
-                {!s.is_current && <SetCurrentButton action={() => setCurrentSession(s.id)} />}
+                {!s.is_current && <SetCurrentButton action={setCurrentSession.bind(null, s.id)} />}
               </li>
             ))}
           </ul>
@@ -115,7 +115,7 @@ export default async function SettingsPage() {
                     {t.session?.name} · {formatDate(t.start_date)} – {formatDate(t.end_date)}
                   </p>
                 </div>
-                {!t.is_current && <SetCurrentButton action={() => setCurrentTerm(t.id)} />}
+                {!t.is_current && <SetCurrentButton action={setCurrentTerm.bind(null, t.id)} />}
               </li>
             ))}
           </ul>
@@ -185,7 +185,7 @@ export default async function SettingsPage() {
                         confirmLabel="Delete"
                         variant="danger"
                         successMessage="Grade boundary deleted."
-                        action={() => deleteGradeBoundary(b.id)}
+                        action={deleteGradeBoundary.bind(null, b.id)}
                       />
                     </div>
                   </td>

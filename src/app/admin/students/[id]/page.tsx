@@ -49,7 +49,7 @@ export default async function StudentProfilePage({ params }: { params: { id: str
                 confirmLabel="Archive"
                 variant="danger"
                 successMessage="Student archived."
-                action={() => setStudentStatus(student.id, 'archived')}
+                action={setStudentStatus.bind(null, student.id, 'archived')}
               />
             ) : (
               <ConfirmActionButton
@@ -58,7 +58,7 @@ export default async function StudentProfilePage({ params }: { params: { id: str
                 confirmMessage="This will mark the student as active again."
                 confirmLabel="Restore"
                 successMessage="Student restored."
-                action={() => setStudentStatus(student.id, 'active')}
+                action={setStudentStatus.bind(null, student.id, 'active')}
               />
             )}
           </div>

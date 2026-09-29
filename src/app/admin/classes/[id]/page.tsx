@@ -58,7 +58,7 @@ export default async function ClassProfilePage({ params }: { params: { id: strin
                 confirmLabel="Archive"
                 variant="danger"
                 successMessage="Class archived."
-                action={() => setClassStatus(cls.id, 'archived')}
+                action={setClassStatus.bind(null, cls.id, 'archived')}
               />
             ) : (
               <ConfirmActionButton
@@ -67,7 +67,7 @@ export default async function ClassProfilePage({ params }: { params: { id: strin
                 confirmMessage="This will mark the class as active again."
                 confirmLabel="Restore"
                 successMessage="Class restored."
-                action={() => setClassStatus(cls.id, 'active')}
+                action={setClassStatus.bind(null, cls.id, 'active')}
               />
             )}
           </div>

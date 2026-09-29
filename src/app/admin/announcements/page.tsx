@@ -122,7 +122,7 @@ export default async function AdminAnnouncementsPage({
                       }
                       confirmLabel={a.is_archived ? 'Restore' : 'Archive'}
                       successMessage={a.is_archived ? 'Announcement restored.' : 'Announcement archived.'}
-                      action={() => setAnnouncementArchived(a.id, !a.is_archived)}
+                      action={setAnnouncementArchived.bind(null, a.id, !a.is_archived)}
                     />
                     <ConfirmActionButton
                       label="Delete"
@@ -131,7 +131,7 @@ export default async function AdminAnnouncementsPage({
                       confirmLabel="Delete"
                       variant="danger"
                       successMessage="Announcement deleted."
-                      action={() => deleteAnnouncement(a.id)}
+                      action={deleteAnnouncement.bind(null, a.id)}
                     />
                   </div>
                 </li>

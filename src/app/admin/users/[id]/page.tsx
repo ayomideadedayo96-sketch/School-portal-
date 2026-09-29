@@ -51,7 +51,7 @@ export default async function UserDetailPage({ params }: { params: { id: string 
                 confirmLabel="Deactivate"
                 variant="danger"
                 successMessage="User deactivated."
-                action={() => setStaffStatus(staff.id, 'inactive')}
+                action={setStaffStatus.bind(null, staff.id, 'inactive')}
               />
             ) : (
               <ConfirmActionButton
@@ -60,7 +60,7 @@ export default async function UserDetailPage({ params }: { params: { id: string 
                 confirmMessage="This will restore their access to the portal."
                 confirmLabel="Activate"
                 successMessage="User activated."
-                action={() => setStaffStatus(staff.id, 'active')}
+                action={setStaffStatus.bind(null, staff.id, 'active')}
               />
             )}
           </div>

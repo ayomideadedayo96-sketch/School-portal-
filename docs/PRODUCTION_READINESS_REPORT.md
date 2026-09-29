@@ -217,3 +217,21 @@ local timezone with no offset correction from the browser. Fine for a
 single-timezone deployment (the normal case for one school); would need
 a small fix if this ever serves admins across different timezones.
 
+
+### Resolved after go-live testing (round 3 — found from real crashes on the live site)
+
+- **Pages crashed whenever a Confirm/Deactivate/Delete button was on them.**
+  `ConfirmActionButton` (and `SetCurrentButton`) are browser components
+  that take a function prop, but 16 places in 9 server pages passed them
+  a plain inline function — something Next.js does not allow across the
+  server/browser boundary. Affected: Users detail, Staff detail, Students
+  detail, Classes detail, Settings, Teacher assignments, Subjects,
+  Announcements, Documents. Fixed by passing `serverAction.bind(null, id)`
+  instead (a proper server-action reference). Lesson: this class of bug
+  only shows up in a real production build with real rows on screen.
+- **Invite links never signed the person in.** The browser Supabase client
+  is configured for the PKCE flow and refuses the `#access_token=…` links
+  that admin invites produce, so `/auth/callback` always reported failure.
+  It now reads the token from the link and signs in with `setSession()`,
+  reports expired/used links immediately, and the login page explains
+  what happened.

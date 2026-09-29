@@ -48,7 +48,7 @@ export default async function StaffProfilePage({ params }: { params: { id: strin
                 confirmLabel="Deactivate"
                 variant="danger"
                 successMessage="Staff member deactivated."
-                action={() => setStaffStatus(staff.id, 'inactive')}
+                action={setStaffStatus.bind(null, staff.id, 'inactive')}
               />
             ) : (
               <ConfirmActionButton
@@ -57,7 +57,7 @@ export default async function StaffProfilePage({ params }: { params: { id: strin
                 confirmMessage="This will mark them as active again."
                 confirmLabel="Activate"
                 successMessage="Staff member activated."
-                action={() => setStaffStatus(staff.id, 'active')}
+                action={setStaffStatus.bind(null, staff.id, 'active')}
               />
             )}
           </div>

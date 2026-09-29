@@ -98,7 +98,7 @@ export default async function TeacherAssignmentsPage({
                           confirmLabel="Remove"
                           variant="danger"
                           successMessage="Assignment removed."
-                          action={() => deleteTeacherAssignment(a.id)}
+                          action={deleteTeacherAssignment.bind(null, a.id)}
                         />
                       </div>
                     </td>
